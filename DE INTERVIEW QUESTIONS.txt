@@ -1,0 +1,379 @@
+Azure Data Factory (ADF)
+
+1. What is the difference between Copy Activity and Data Flow in ADF?
+Copy activity tab use karni chahiye jab hume data ko ek data store se dusre data store mai bhejni ho without any data transformation
+but agar hume data mai transformations karne hai toh humko Data Flow activity use karni chahaiye
+
+
+2. How do you monitor and troubleshoot pipelines in ADF?
+"In ADF, we have a Monitor tab where we can click and select the pipeline to check its status.
+If we see a failed message, we need to troubleshoot it by:
+Starting with the connection of the data sources,
+Checking the linked service authentication, and
+Running the pipeline in debug mode to identify the issue before executing it again."
+
+3. Explain how you would implement a pipeline for:
+
+Ingesting files from ADLS Gen2.
+
+Applying transformations.
+
+Loading into SQL Database.
+
+---->"First, I will create all necessary resources: ADLS Gen2 for the source, SQL Database for the target, and ADF for orchestration. I will also create linked services for both ADLS Gen2 and SQL Database to establish connections.
+
+In ADF, I will design a pipeline with a Data Flow activity.
+
+The source will be configured to load data from ADLS Gen2, and if transformations are needed (e.g., filtering, column mapping, or aggregations), they will be applied in the Data Flow.
+The sink will be set as the SQL Database, with the appropriate table mapped for data loading.
+Finally, I will run the pipeline in Debug mode to verify the setup and transformations. Once it works correctly, I will publish and execute the pipeline to load the transformed data into SQL Database."
+
+4. What is Integration Runtime in ADF?
+"Integration Runtime (IR) is like a Compute Engine for Azure Data Factory that handles data movement and data transformation. It acts as the backbone for connecting data sources and executing tasks. There are three types of IRs:
+
+Azure Integration Runtime: Used for cloud-based data movement and transformations.
+Self-hosted Integration Runtime: Used for connecting on-premises or private network data sources to Azure.
+Azure-SSIS Integration Runtime: Used for running SSIS packages in Azure."
+
+5. How would you handle schema drift during transformations?
+"Schema drift ka matlab hai ki data ke existing columns mein changes hona, jaise ki columns ka add hona, delete hona, column name ka change hona, ya data type ka change hona.
+
+Isko handle karne ke liye humein Data Flow Activity mein schema drift ko enable karna hota hai. Jab hum schema drift enable karte hain, toh ADF future mein agar koi columns add hote hain ya schema mein koi changes hote hain, toh wo automatically handle ho jaate hain.
+
+Agar schema drift ke wajah se koi issue ya error aata hai, toh hum Monitor > Alerts/Notifications set kar sakte hain taaki hum timely notify ho sakein aur errors ko handle kar sakein."**
+
+
+
+---
+
+Azure Databricks
+
+1. Explain the concept of Delta Lake.
+Delta Lake ek storage layer hai jo Azure Data Lake Storage (ADLS) aur other cloud-based data lakes par implement hota hai. Iska main goal hai ki aapko transactional consistency, schema evolution, aur data reliability provide kiya jaaye, jo traditional data lakes mein available nahi hote.
+
+Key Features of Delta Lake:
+ACID Transactions:
+Delta Lake ACID properties ko support karta hai. Iska matlab hai ki multiple users simultaneously data ko write kar sakte hain, bina ek dusre ke queries ko disturb kiye. Ye data consistency aur isolation ko maintain karta hai.
+
+Schema Evolution:
+Agar source data ka schema change hota hai (naye columns add hote hain, existing columns ka type change hota hai), toh Delta Lake automatic schema evolution ko handle kar leta hai. Iske alawa, ye humein schema enforcement ka control deta hai, jisme hum specify kar sakte hain ki columns ko kis format mein store kiya jaana chahiye.
+
+Time Travel:
+Delta Lake ka time travel feature kaafi important hai, kyunki iske through hum data versioning aur timestamp ke basis par previous versions ko retrieve kar sakte hain. Agar koi accidental data overwrite ho jaye, toh aap purana version easily restore kar sakte hain.
+
+Merge Operations:
+Delta Lake MERGE operation ko support karta hai, jiska matlab hai ki aap existing data ko update ya delete kar sakte hain bina poore dataset ko overwrite kiye.
+
+2. How would you optimize a Spark job in Databricks?
+Select Only Relevant Columns:
+Sirf zaroori columns select karo taaki data size kam ho.
+
+Repartitioning:
+Data ko evenly distribute karne ke liye repartitioning karo aur data skew ko avoid karo.
+
+Caching:
+Jo data baar-baar use ho raha ho, usse cache karo taaki performance improve ho.
+
+Broadcast Joins:
+Small tables ko broadcast karke join speed ko optimize karo.
+
+Tuning Spark Configurations:
+Spark configurations jaise spark.sql.shuffle.partitions, executor.memory tune karo based on data size.
+
+
+3. What are the key differences between DataFrame and RDD in PySpark?
+RDD (Resilient Distributed Dataset):
+RDD ek aisa data structure hai jo data ko multiple nodes pe store karta hai, taaki wo distributed ho aur parallelly process ho sake.
+RDD ko aap kisi bhi language (Python, Scala, etc.) se access kar sakte ho.
+Data in RDD is immutable, matlab ek baar data set create hone ke baad, aap usse change nahi kar sakte.
+Data transformations (like filter(), map(), reduce()) ko manually likhna padta hai, jo complex aur time-consuming ho sakte hain.
+
+DataFrame:
+DataFrame ek structured data format hai, jisme data rows aur columns ki form mein organize hota hai, jaise SQL tables.
+Data in DataFrame is mutable, matlab aap data ko modify kar sakte ho (for example, adding/removing columns, changing values).
+SQL queries ka support milta hai, jo operations ko simple aur efficient banaata hai. Aap select(), filter(), groupBy(), jaise operations SQL style mein likh sakte ho.
+
+4. Explain how Databricks integrates with Azure Data Factory.
+
+### **Why Use Databricks for Transformations Instead of ADF Data Flow?**
+
+**Complex Data Transformations**:
+   - **ADF Data Flow** basic to moderately complex transformations handle kar sakta hai, jaise filtering, mapping, aggregation, etc.
+   - **Databricks** zyada complex and **custom transformations** ke liye suitable hai, especially jab aapko Python, Scala, ya Spark libraries ka use karke advanced operations perform karna ho.
+
+
+**Version Control & Flexibility**:
+   - Databricks ke notebooks version-controlled hote hain aur flexible hote hain for iterative development.
+   - ADF Data Flow mein aapko limited visual UI-based options milte hain.
+
+---
+
+### **Correct Steps to Integrate Databricks with ADF**:
+
+**Create Azure Resources**:
+   - Create **Azure Databricks Workspace**.
+   - Create **Azure Data Factory**.
+   - Create **Linked Services**:
+     - For **Databricks** (to connect Databricks workspace with ADF).
+     - For **Data Source** (to connect ADF with your source data like Blob Storage, ADLS Gen2, etc.).
+
+**Prepare Databricks Notebook**:
+   - Databricks workspace mein ek **notebook** banao.
+   - Usme:
+     - **Source data** ko load karne ka code likho (using key, connection string, etc.).
+     - Jo bhi **custom transformations** required hain, wo likho.
+     - Output data ko processed format mein **destination location** (e.g., ADLS Gen2, Blob, SQL DB) pe save karo.
+
+**Configure Databricks Notebook in ADF**:
+   - ADF ke **pipeline** section mein jao.
+   - Ek **Databricks Notebook Activity** add karo.
+   - Is activity mein:
+     - Databricks workspace ka **linked service** select karo.
+     - Jo notebook aapne create kiya tha, uska path specify karo.
+     - Databricks cluster details add karo (jo notebook execute karega).
+
+**Debug & Validate Pipeline**:
+   - Pipeline ko **debug** karo aur ensure karo ki:
+     - Notebook correctly execute ho raha hai.
+     - Source-to-destination data transformations theek se ho rahi hain.
+
+**Add Triggers**:
+   - Pipeline run karne ke liye ek **trigger** set karo:
+     - **Schedule Trigger**: Fixed interval par chalane ke liye.
+     - **Event-Based Trigger**: Jab naya data aaye tab chalane ke liye.
+     - **Manual Trigger**: Jab manually run karna ho.
+   
+**Run and Monitor**:
+   - Pipeline ko run karo.
+   - ADF ke **Monitor** tab se pipeline execution ka status check karo.
+   - Agar koi issue ho, toh logs ko troubleshoot karo.
+
+---
+
+### **Triggers Recap**:
+- **Event Trigger**: Jab koi nayi file source pe aaye (e.g., Blob/ADLS), tab pipeline chale.
+- **Scheduled Trigger**: Specific time pe (daily, hourly, etc.).
+- **Tumbling Window Trigger**: Time intervals ke liye, e.g., past hour ka data process karna.
+- **Manual Trigger**: Jab aap manually run karna chahein.
+
+
+5. What are the advantages of using MLflow in Databricks?
+
+
+
+
+---
+
+PySpark
+
+1. How does PySpark handle large datasets?
+Distributed processing
+lazy evaluation
+catalyst optimizer
+parallelism
+
+**PySpark & Distributed Processing**:  
+   PySpark large datasets ko **multiple nodes** par distribute karta hai, jo **distributed processing** ko enable karta hai. Isse data processing fast aur scalable ho jati hai.
+
+**Catalyst Optimizer**:  
+   Jab hum **transformations** (e.g., `.filter()`, `.groupBy()`) perform karte hain, Catalyst Optimizer ek **execution plan** banata hai.  
+   - Ye plan transformations ko **optimize** karke fast execution karta hai.
+   - Logical plan ko `.explain()` se dekha ja sakta hai.  
+
+   **Example**: 
+   ```python
+   df.filter(df["Salary"] > 5000).groupBy("Department").agg(F.sum("Salary")).explain()
+   ```
+
+**Lazy Evaluation**:  
+   PySpark me **transformations** tab tak execute nahi hote jab tak koi **action** (e.g., `.show()`, `.collect()`) trigger na ho.  
+   - Ye feature unnecessary computations ko avoid karta hai.
+
+   **Example**:  
+   ```python
+   transformed_df = df.filter(df["Age"] > 30)  # No execution yet
+   transformed_df.show()  # Ab execution hoga
+   ```
+**Parallelism**:  
+   PySpark **multiple nodes** par **parallel processing** karta hai, jisse transformations ek saath perform hote hain.  
+   - **Partitions** ke zariye data ko distribute karta hai.
+
+   **Example**:  
+   ```python
+   df.repartition(5).groupBy("Category").agg(F.sum("Sales")).show()
+   ```
+
+2. Write a PySpark script to remove duplicates from a DataFrame based on a column.
+df.dropDuplicates(["column_name"]).show()
+
+
+3. How would you broadcast variables in PySpark?
+df1.join(broadcast(df2), on=pk, how='')
+
+
+
+4. What is Catalyst Optimizer, and how does it help in Spark?
+refer question 1
+
+
+5. How do you handle skewed data in PySpark?
+repartition or coaelsce
+
+
+
+
+---
+
+SQL
+
+1. Write a query to fetch the second-highest salary.
+
+SELECT MAX(salary) AS SecondHighest
+FROM Employee
+WHERE salary < (SELECT MAX(salary) FROM Employee);
+
+
+2. How would you optimize a SQL query that joins two large tables?
+
+
+
+3. What are window functions, and where do you use them?
+
+
+4. Write a query to find duplicate rows in a table.
+
+SELECT column1, COUNT(*) 
+FROM table_name 
+GROUP BY column1 
+HAVING COUNT(*) > 1;
+
+
+5. How do indexes work in SQL?
+
+
+
+
+---
+
+Azure Storage
+
+1. How do you secure access to data in Azure Data Lake using Key Vault?
+
+
+2. What are the key differences between Blob Storage and ADLS Gen2?
+blob storage unstructured/structured type data store karne k liye hai, container k andar karta hai
+isme no hierarcheal namespace is followed 
+ye cost effective hai
+moderate workloads k liye thik hai
+role based access hota hai isme
+
+adls gen 2:
+structured/unstructured data k storage k liye hai
+proper folder/files/fils.extension type storage hota hai
+big data k sath deal karte hai tab use karte hai
+used for heavy workloads
+this is a bit costly than storage account
+Advanced security (ACLs - Access Control Lists) ye hota hai
+
+
+3. Explain the process of configuring a storage account for ADF.
+
+
+---
+
+General Data Engineering
+
+1. How do you manage data pipelines for error handling and recovery?
+
+
+2. How would you migrate on-premise data to Azure using ADF?
+
+
+3. What are some best practices for designing scalable pipelines in Databricks?
+
+
+4. How do you monitor and log data pipeline performance?
+
+
+
+
+---
+
+Practical Focus
+
+Build an ADF pipeline that copies a CSV file from Blob Storage to a SQL table.
+To build an **ADF pipeline** that copies a CSV file from **Blob Storage** to a **SQL table**, follow these steps:
+
+### **1. Create the Required Resources**
+Make sure you have the following resources ready in Azure:
+- **Azure Blob Storage** with the CSV file.
+- **SQL Database** where you want to copy the data.
+- **Azure Data Factory (ADF)**.
+
+### **2. Create Linked Services**
+1. **Create Linked Service for Blob Storage:**
+   - In ADF, go to **Manage** (on the left pane) > **Linked services** > **New** > **Azure Blob Storage**.
+   - Provide connection details (Account Name, Account Key, etc.).
+   - Test the connection and click **Create**.
+
+2. **Create Linked Service for SQL Database:**
+   - In ADF, go to **Manage** > **Linked services** > **New** > **SQL Database**.
+   - Provide connection details (Server, Database Name, Authentication Type, etc.).
+   - Test the connection and click **Create**.
+
+### **3. Create Datasets**
+1. **Create Dataset for Blob Storage (CSV file):**
+   - Go to **Author** (pencil icon) > **Datasets** > **New Dataset** > **Azure Blob Storage**.
+   - Select **DelimitedText** (for CSV files).
+   - Select the **Linked Service** for Blob Storage that you created earlier.
+   - Browse to the **CSV file** in the Blob Storage container.
+   - Configure column delimiter, row delimiter, and column types.
+
+2. **Create Dataset for SQL Database:**
+   - Go to **Author** > **Datasets** > **New Dataset** > **SQL Database**.
+   - Select the **Linked Service** for SQL Database.
+   - Select the **table** where you want to copy the data.
+
+### **4. Create the Pipeline**
+1. Go to **Author** > **Pipelines** > **New Pipeline**.
+2. Drag and drop the **Copy Data** activity from the activities panel to the pipeline canvas.
+
+### **5. Configure the Copy Activity**
+1. **Source:**
+   - Click on the **Source** tab in the **Copy Data** activity.
+   - Choose the **Dataset** for Blob Storage (CSV file).
+   - Configure any additional settings like **column mappings** or **file formats** if needed.
+
+2. **Sink:**
+   - Click on the **Sink** tab.
+   - Choose the **Dataset** for SQL Database.
+   - Ensure the table structure in SQL matches the structure of the CSV file.
+   - Choose whether you want to append or overwrite data in the SQL table.
+
+### **6. Set Up Mapping (Optional)**
+- If the columns in the CSV file don't exactly match the SQL table schema, you can configure the **column mapping**.
+  - Go to the **Mapping** tab.
+  - Map columns from the source (CSV) to the sink (SQL table).
+
+### **7. Trigger the Pipeline**
+1. You can either **manually trigger** the pipeline or set up a **trigger** to run it on a schedule or based on an event.
+   - To trigger manually, click on **Debug** or **Trigger** and select **Trigger Now**.
+
+### **8. Monitor the Pipeline**
+- Go to the **Monitor** tab in ADF to check the pipeline’s execution status, see if there are any errors, and track the progress of the copy operation.
+
+### **Example Flow:**
+1. **Blob Storage (Source):**
+   - **CSV File** stored in a blob container.
+2. **Copy Data Activity:**
+   - Reads data from the CSV file.
+3. **SQL Database (Sink):**
+   - Data is inserted into the destination SQL table.
+
+Write a PySpark code snippet to filter data where a column value is greater than a threshold.
+df.filter(f.col(col_name) > threshold).display()
+
+Demonstrate how you would use Delta Lake for versioning.
+
+Debug a failing pipeline: The source dataset schema changed, and the pipeline broke. How would you fix it?
+I will just go to pipeline and enable schema drift thats all man
